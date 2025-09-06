@@ -30,7 +30,18 @@ impl Repository {
             return None;
         }
         
-        let path = git_dir.parent().unwrap_or_else(|| Path::new(".")).to_path_buf();
+        let path = if git_dir.file_name() == Some(std::ffi::OsStr::new(".aigit")) {
+            git_dir.parent().unwrap_or_else(|| Path::new(".")).to_path_buf()
+        } else {
+            std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
+        };
+        
+        let path = if path.as_os_str().is_empty() {
+            std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
+        } else {
+            path
+        };
+        
         let repo_id = Self::load_repo_id(&git_dir).unwrap_or_else(|| "unknown".to_string());
         
         Some(Repository { 
