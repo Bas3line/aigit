@@ -1,0 +1,12 @@
+target/
+Cargo.lock
+.env
+*.tmp
+*.log
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+tests/test_repos
+todo.txt
