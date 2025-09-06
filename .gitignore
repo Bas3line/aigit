@@ -20,3 +20,7 @@ build/
 .cache/
 *.lock
 !Cargo.lock
+
+todo.txt
+.aigit/
+.aigit
