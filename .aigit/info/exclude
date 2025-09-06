@@ -1,0 +1,14 @@
+*.o
+*.a
+*.so
+*~
+*.swp
+*.tmp
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+*.orig
+core
+.#*
+#*#

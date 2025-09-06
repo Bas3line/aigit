@@ -10,14 +10,32 @@ pub struct GeminiClient {
 
 impl GeminiClient {
     pub fn new() -> Self {
+        dotenv::dotenv().ok();
+        
         let client = Client::builder()
             .timeout(Duration::from_secs(30))
             .build()
             .expect("Failed to create HTTP client");
 
+        let api_key = env::var("GEMINI_API_KEY")
+            .or_else(|_| {
+                if std::path::Path::new(".env").exists() {
+                    let env_content = std::fs::read_to_string(".env")
+                        .expect("Failed to read .env file");
+                    
+                    for line in env_content.lines() {
+                        if line.starts_with("GEMINI_API_KEY=") {
+                            return Ok(line.strip_prefix("GEMINI_API_KEY=").unwrap_or("").to_string());
+                        }
+                    }
+                }
+                Err(env::VarError::NotPresent)
+            })
+            .expect("GEMINI_API_KEY must be set in environment or .env file");
+
         Self {
             client,
-            api_key: env::var("GEMINI_API_KEY").expect("GEMINI_API_KEY must be set"),
+            api_key,
         }
     }
 
@@ -305,7 +323,7 @@ impl GeminiClient {
         let response = self
             .client
             .post(&format!(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={}",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}",
                 self.api_key
             ))
             .header("Content-Type", "application/json")

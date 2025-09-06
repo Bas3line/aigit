@@ -256,11 +256,13 @@ async fn security_pre_commit_checks(index: &Index) -> Result<(), Box<dyn std::er
     }
     
     for (file_path, entry) in &index.metadata {
-        let current_content = std::fs::read(file_path)?;
-        let current_checksum = hex::encode(digest::digest(&digest::SHA256, &current_content).as_ref());
-        
-        if entry.checksum != current_checksum {
-            return Err(format!("File {} was modified after staging", file_path).into());
+        if std::path::Path::new(file_path).exists() {
+            let current_content = std::fs::read(file_path)?;
+            let current_checksum = hex::encode(digest::digest(&digest::SHA256, &current_content).as_ref());
+            
+            if entry.checksum != current_checksum {
+                return Err(format!("File {} was modified after staging", file_path).into());
+            }
         }
     }
     

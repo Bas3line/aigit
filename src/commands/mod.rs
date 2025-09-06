@@ -10,3 +10,4 @@ pub mod diff;
 pub mod merge;
 pub mod review;
 pub mod suggest;
+pub mod push;

@@ -78,6 +78,9 @@ enum Commands {
         #[command(subcommand)]
         action: SuggestCommands,
     },
+    Push {
+        branch: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -158,6 +161,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 SuggestCommands::Tests => commands::suggest::tests().await?,
                 SuggestCommands::Cleanup => commands::suggest::cleanup().await?,
             }
+        },
+        Commands::Push { branch } => {
+            commands::push::run(branch.clone()).await?
         },
     }
 

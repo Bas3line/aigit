@@ -1,0 +1,37 @@
+[core]
+    repositoryformatversion = 0
+    filemode = true
+    bare = false
+    logallrefupdates = true
+    precomposeunicode = true
+    protectHFS = true
+    protectNTFS = true
+    ignorecase = false
+    trustctime = false
+    checkStat = minimal
+    autocrlf = false
+    safecrlf = true
+    quotepath = false
+
+[security]
+    enabled = true
+    requireSignature = true
+    auditLog = true
+    encryptObjects = false
+    hashAlgorithm = sha256
+    compressionLevel = 6
+
+[ai]
+    enabled = true
+    model = gemini-pro
+    maxTokens = 2048
+    temperature = 0.7
+    requireReview = false
+    autoCommitMessage = true
+
+[user]
+    signingkey = ""
+    
+[commit]
+    gpgsign = false
+    template = ""

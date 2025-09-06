@@ -1,0 +1,13 @@
+{
+    "audit_log": true,
+    "require_signature": false,
+    "encrypt_objects": false,
+    "hash_algorithm": "sha256",
+    "max_file_size": 104857600,
+    "blocked_extensions": [".exe", ".dll", ".bat", ".cmd", ".com", ".pif", ".scr"],
+    "scan_content": true,
+    "rate_limit": {
+        "commits_per_hour": 100,
+        "size_limit_mb": 100
+    }
+}

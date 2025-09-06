@@ -1,0 +1,5 @@
+#!/bin/sh
+if [ -f ".aigit/security/pre-commit-checks" ]; then
+    exec ".aigit/security/pre-commit-checks"
+fi
+exit 0
