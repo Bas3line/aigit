@@ -216,9 +216,11 @@ impl Repository {
             return Err(RepoError::Corrupted("Missing refs directory".to_string()));
         }
 
-        let expected_id = Self::generate_repo_id(&self.git_dir);
-        if self.repo_id != "unknown" && self.repo_id != expected_id {
-            return Err(RepoError::Corrupted("Repository ID mismatch".to_string()));
+        let stored_id = Self::load_repo_id(&self.git_dir);
+        if let Some(stored) = stored_id {
+            if self.repo_id != "unknown" && self.repo_id != stored {
+                return Err(RepoError::Corrupted("Repository ID mismatch".to_string()));
+            }
         }
 
         Ok(())

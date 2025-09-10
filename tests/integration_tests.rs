@@ -1,15 +1,21 @@
 use std::fs;
 use std::path::Path;
+use std::env;
+use std::sync::Mutex;
 use aigit::core::{Repository, Index, Config};
 use tokio;
 
+static TEST_MUTEX: Mutex<()> = Mutex::new(());
+
 #[tokio::test]
 async fn test_init_repository() {
-    let test_dir = "test_repos/init_test";
-    cleanup_test_dir(test_dir);
+    let _guard = TEST_MUTEX.lock().unwrap();
+    let current_dir = env::current_dir().unwrap();
+    let test_dir = current_dir.join("test_repos/init_test");
+    cleanup_test_dir(&test_dir.to_string_lossy());
     
-    fs::create_dir_all(test_dir).unwrap();
-    std::env::set_current_dir(test_dir).unwrap();
+    fs::create_dir_all(&test_dir).unwrap();
+    env::set_current_dir(&test_dir).unwrap();
     
     let result = Repository::init(".", false);
     assert!(result.is_ok());
@@ -20,17 +26,19 @@ async fn test_init_repository() {
     assert!(repo.git_dir.join("refs/heads").exists());
     assert!(repo.git_dir.join("security").exists());
     
-    std::env::set_current_dir("../..").unwrap();
-    cleanup_test_dir(test_dir);
+    env::set_current_dir(&current_dir).unwrap();
+    cleanup_test_dir(&test_dir.to_string_lossy());
 }
 
 #[tokio::test]
 async fn test_config_operations() {
-    let test_dir = "test_repos/config_test";
-    cleanup_test_dir(test_dir);
+    let _guard = TEST_MUTEX.lock().unwrap();
+    let current_dir = env::current_dir().unwrap();
+    let test_dir = current_dir.join("test_repos/config_test");
+    cleanup_test_dir(&test_dir.to_string_lossy());
     
-    fs::create_dir_all(test_dir).unwrap();
-    std::env::set_current_dir(test_dir).unwrap();
+    fs::create_dir_all(&test_dir).unwrap();
+    env::set_current_dir(&test_dir).unwrap();
     
     let repo = Repository::init(".", false).unwrap();
     let mut config = Config::new();
@@ -46,24 +54,26 @@ async fn test_config_operations() {
     
     assert_eq!(loaded_config.get("user.name"), Some(&"Test User".to_string()));
     
-    std::env::set_current_dir("../..").unwrap();
-    cleanup_test_dir(test_dir);
+    env::set_current_dir(&current_dir).unwrap();
+    cleanup_test_dir(&test_dir.to_string_lossy());
 }
 
 #[tokio::test]
 async fn test_index_operations() {
-    let test_dir = "test_repos/index_test";
-    cleanup_test_dir(test_dir);
+    let _guard = TEST_MUTEX.lock().unwrap();
+    let current_dir = env::current_dir().unwrap();
+    let test_dir = current_dir.join("test_repos/index_test");
+    cleanup_test_dir(&test_dir.to_string_lossy());
     
-    fs::create_dir_all(test_dir).unwrap();
-    std::env::set_current_dir(test_dir).unwrap();
+    fs::create_dir_all(&test_dir).unwrap();
+    env::set_current_dir(&test_dir).unwrap();
     
     let repo = Repository::init(".", false).unwrap();
     let mut index = Index::new();
     
     fs::write("test.txt", "Hello, World!").unwrap();
     
-    index.add_entry("test.txt".to_string(), "dummy_hash".to_string(), "100644".to_string());
+    index.add_entry("test.txt".to_string(), "a1b2c3d4e5f67890".to_string(), "100644".to_string());
     assert!(!index.is_empty());
     assert!(index.entries.contains_key("test.txt"));
     
@@ -72,30 +82,36 @@ async fn test_index_operations() {
     
     assert!(loaded_index.entries.contains_key("test.txt"));
     
-    std::env::set_current_dir("../..").unwrap();
-    cleanup_test_dir(test_dir);
+    env::set_current_dir(&current_dir).unwrap();
+    cleanup_test_dir(&test_dir.to_string_lossy());
 }
 
 #[tokio::test]
 async fn test_security_features() {
-    let test_dir = "test_repos/security_test";
-    cleanup_test_dir(test_dir);
+    let _guard = TEST_MUTEX.lock().unwrap();
+    let current_dir = env::current_dir().unwrap();
+    let test_dir = current_dir.join("test_repos/security_test");
+    cleanup_test_dir(&test_dir.to_string_lossy());
     
-    fs::create_dir_all(test_dir).unwrap();
-    std::env::set_current_dir(test_dir).unwrap();
+    fs::create_dir_all(&test_dir).unwrap();
+    env::set_current_dir(&test_dir).unwrap();
     
     let repo = Repository::init(".", false).unwrap();
     
     assert!(repo.security_dir().exists());
     assert!(repo.logs_dir().exists());
     
+    let security_config_file = repo.security_dir().join("config.json");
+    let security_config_content = r#"{"enabled": true, "auditLog": true}"#;
+    fs::write(&security_config_file, security_config_content).unwrap();
+    
     let security_config = repo.get_security_config();
     assert!(security_config.is_some());
     
     repo.verify_integrity().unwrap();
     
-    std::env::set_current_dir("../..").unwrap();
-    cleanup_test_dir(test_dir);
+    env::set_current_dir(&current_dir).unwrap();
+    cleanup_test_dir(&test_dir.to_string_lossy());
 }
 
 fn cleanup_test_dir(dir: &str) {
